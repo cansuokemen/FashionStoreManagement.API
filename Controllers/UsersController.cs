@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,13 +30,27 @@ namespace FashionStoreManagement.API.Controllers
             return user;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register([FromBody] UserRegisterDto dto)
         {
+            // E-posta tekil olmalı
+            var exists = await _context.Users.AnyAsync(u => u.Email == dto.Email);
+            if (exists)
+                return Conflict("Bu e-posta ile daha önce kayıt olunmuş.");
+
+            var user = new User
+            {
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Password = dto.Password // Gerçek projede hashlenmeli!
+            };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User user)
