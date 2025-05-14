@@ -39,10 +39,19 @@ namespace FashionStoreManagement.API.Controllers
             };
 
             _context.Brands.Add(brand);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("IX_Brands_Name") == true)
+            {
+                return Conflict("Bu marka adı zaten kayıtlı.");
+            }
 
             return CreatedAtAction(nameof(GetBrand), new { id = brand.Id }, brand);
         }
+
 
 
         [HttpPut("{id}")]
