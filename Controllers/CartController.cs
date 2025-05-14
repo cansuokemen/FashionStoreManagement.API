@@ -17,7 +17,7 @@ namespace FashionStoreManagement.API.Controllers
             _context = context;
         }
 
-        // GET: api/Cart/user/5
+        // ✅ 1. Sepeti getir (userId üzerinden)
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<CartItem>>> GetCart(int userId)
         {
@@ -30,10 +30,25 @@ namespace FashionStoreManagement.API.Controllers
             return items;
         }
 
-        // POST: api/Cart
+        // ✅ 2. Sepete ürün ekle (stok + validasyon kontrolleriyle)
         [HttpPost]
-        public async Task<ActionResult<CartItem>> AddToCart([FromBody] CartItemDto dto)
+        public async Task<IActionResult> AddToCart([FromBody] CartItemDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var productSize = await _context.ProductSizes
+                .FirstOrDefaultAsync(ps => ps.ProductId == dto.ProductId && ps.SizeId == dto.SizeId);
+
+            if (productSize == null)
+                return BadRequest("Bu ürün-beden kombinasyonu sistemde tanımlı değil.");
+
+            if (productSize.StockQuantity <= 0)
+                return BadRequest("Bu ürün-beden stoğu tükenmiş.");
+
+            if (dto.Quantity > productSize.StockQuantity)
+                return BadRequest($"Stokta yalnızca {productSize.StockQuantity} adet var.");
+
             var existing = await _context.CartItems
                 .FirstOrDefaultAsync(c =>
                     c.UserId == dto.UserId &&
@@ -46,24 +61,23 @@ namespace FashionStoreManagement.API.Controllers
             }
             else
             {
-                var newItem = new CartItem
+                var item = new CartItem
                 {
                     UserId = dto.UserId,
                     ProductId = dto.ProductId,
                     SizeId = dto.SizeId,
                     Quantity = dto.Quantity
                 };
-                _context.CartItems.Add(newItem);
+                _context.CartItems.Add(item);
             }
 
             await _context.SaveChangesAsync();
-            return Ok();
+            return Ok("Ürün sepete eklendi.");
         }
 
-
-        // PUT: api/Cart/{cartItemId}
+        // ✅ 3. Sepet ürününü `CartItem.Id` ile güncelle (klasik yöntem)
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateQuantity(int id, [FromBody] int quantity)
+        public async Task<IActionResult> UpdateQuantityById(int id, [FromBody] int quantity)
         {
             var item = await _context.CartItems.FindAsync(id);
             if (item == null) return NotFound();
@@ -74,9 +88,33 @@ namespace FashionStoreManagement.API.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Cart/{cartItemId}
+        // ✅ 4. Sepet ürününü `UserId + ProductId + SizeId` ile güncelle (stok kontrolü dahil)
+        [HttpPut]
+        public async Task<IActionResult> UpdateQuantity([FromBody] CartItemDto dto)
+        {
+            var item = await _context.CartItems
+                .FirstOrDefaultAsync(c => c.UserId == dto.UserId && c.ProductId == dto.ProductId && c.SizeId == dto.SizeId);
+
+            if (item == null)
+                return NotFound("Sepet kaydı bulunamadı.");
+
+            var stock = await _context.ProductSizes
+                .FirstOrDefaultAsync(ps => ps.ProductId == dto.ProductId && ps.SizeId == dto.SizeId);
+
+            if (stock == null)
+                return BadRequest("Stok bilgisi bulunamadı.");
+
+            if (dto.Quantity > stock.StockQuantity)
+                return BadRequest($"Stokta yalnızca {stock.StockQuantity} adet var.");
+
+            item.Quantity = dto.Quantity;
+            await _context.SaveChangesAsync();
+            return Ok("Sepet güncellendi.");
+        }
+
+        // ✅ 5. Sepet ürünü silme (`CartItem.Id` ile)
         [HttpDelete("{id}")]
-        public async Task<IActionResult> RemoveFromCart(int id)
+        public async Task<IActionResult> RemoveFromCartById(int id)
         {
             var item = await _context.CartItems.FindAsync(id);
             if (item == null) return NotFound();
@@ -88,3 +126,5 @@ namespace FashionStoreManagement.API.Controllers
         }
     }
 }
+
+        
