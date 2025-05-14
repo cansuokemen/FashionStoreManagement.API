@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,12 +31,19 @@ namespace FashionStoreManagement.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Category>> CreateCategory(Category category)
+        public async Task<ActionResult<Category>> CreateCategory([FromBody] CategoryCreateDto dto)
         {
+            var category = new Category
+            {
+                Name = dto.Name
+            };
+
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(int id, Category category)

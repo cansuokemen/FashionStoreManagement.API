@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,13 +48,23 @@ namespace FashionStoreManagement.API.Controllers
 
         // POST: api/Products
         [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct(Product product)
+        public async Task<ActionResult<Product>> CreateProduct([FromBody] ProductCreateDto dto)
         {
+            var product = new Product
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                CategoryId = dto.CategoryId,
+                BrandId = dto.BrandId
+            };
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
+
 
         // PUT: api/Products/5
         [HttpPut("{id}")]
