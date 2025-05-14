@@ -19,10 +19,10 @@ namespace FashionStoreManagement.API.Controllers
 
         // POST: api/Orders/{userId}
         [HttpPost("{userId}")]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
+        public async Task<IActionResult> CreateOrder(int userId)
         {
             var cartItems = await _context.CartItems
-                .Where(c => c.UserId == dto.UserId)
+                .Where(c => c.UserId == userId) // dto değil, doğrudan parametre
                 .Include(c => c.Product)
                 .ToListAsync();
 
@@ -31,7 +31,7 @@ namespace FashionStoreManagement.API.Controllers
 
             var order = new Order
             {
-                UserId = dto.UserId,
+                UserId = userId,
                 OrderDate = DateTime.Now,
                 OrderItems = new List<OrderItem>()
             };
@@ -59,6 +59,7 @@ namespace FashionStoreManagement.API.Controllers
 
             return Ok(order);
         }
+
 
         // GET: api/Orders/user/5
         [HttpGet("user/{userId}")]

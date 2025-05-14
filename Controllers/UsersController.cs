@@ -70,5 +70,25 @@ namespace FashionStoreManagement.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
+
+            if (user == null)
+                return Unauthorized("Geçersiz e-posta veya şifre.");
+
+            return Ok(new
+            {
+                Message = $"Hoş geldin, {user.FullName}!",
+                UserId = user.Id,
+                Email = user.Email
+            });
+        }
+
     }
 }
