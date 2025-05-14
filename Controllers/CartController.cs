@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,27 +32,34 @@ namespace FashionStoreManagement.API.Controllers
 
         // POST: api/Cart
         [HttpPost]
-        public async Task<ActionResult<CartItem>> AddToCart(CartItem item)
+        public async Task<ActionResult<CartItem>> AddToCart([FromBody] CartItemDto dto)
         {
-            // stok kontrolü yapılabilir (ileride)
             var existing = await _context.CartItems
                 .FirstOrDefaultAsync(c =>
-                    c.UserId == item.UserId &&
-                    c.ProductId == item.ProductId &&
-                    c.SizeId == item.SizeId);
+                    c.UserId == dto.UserId &&
+                    c.ProductId == dto.ProductId &&
+                    c.SizeId == dto.SizeId);
 
             if (existing != null)
             {
-                existing.Quantity += item.Quantity;
+                existing.Quantity += dto.Quantity;
             }
             else
             {
-                _context.CartItems.Add(item);
+                var newItem = new CartItem
+                {
+                    UserId = dto.UserId,
+                    ProductId = dto.ProductId,
+                    SizeId = dto.SizeId,
+                    Quantity = dto.Quantity
+                };
+                _context.CartItems.Add(newItem);
             }
 
             await _context.SaveChangesAsync();
-            return Ok(item);
+            return Ok();
         }
+
 
         // PUT: api/Cart/{cartItemId}
         [HttpPut("{id}")]
