@@ -14,6 +14,10 @@ namespace FashionStoreManagement.API.Data
         public DbSet<Brand> Brands => Set<Brand>();
         public DbSet<Size> Sizes => Set<Size>();
         public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
+        public DbSet<CartItem> CartItems => Set<CartItem>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
