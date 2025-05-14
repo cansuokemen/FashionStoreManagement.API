@@ -58,10 +58,18 @@ namespace FashionStoreManagement.API.Controllers
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
-            if (category == null) return NotFound();
+            if (category == null)
+                return NotFound("Kategori bulunamadı.");
+
+            var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
+            if (hasProducts)
+                return BadRequest("Bu kategoriye bağlı ürünler bulunduğu için silinemez.");
+
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
+
     }
 }
