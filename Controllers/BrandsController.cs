@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,12 +31,19 @@ namespace FashionStoreManagement.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Brand>> CreateBrand(Brand brand)
+        public async Task<ActionResult<Brand>> CreateBrand([FromBody] BrandCreateDto dto)
         {
+            var brand = new Brand
+            {
+                Name = dto.Name
+            };
+
             _context.Brands.Add(brand);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetBrand), new { id = brand.Id }, brand);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBrand(int id, Brand brand)

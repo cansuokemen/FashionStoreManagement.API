@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,12 +31,19 @@ namespace FashionStoreManagement.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Size>> CreateSize(Size size)
+        public async Task<ActionResult<Size>> CreateSize([FromBody] SizeCreateDto dto)
         {
+            var size = new Size
+            {
+                Name = dto.Name
+            };
+
             _context.Sizes.Add(size);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetSize), new { id = size.Id }, size);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSize(int id, Size size)
