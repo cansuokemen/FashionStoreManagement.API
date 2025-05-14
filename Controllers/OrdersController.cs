@@ -1,4 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +19,10 @@ namespace FashionStoreManagement.API.Controllers
 
         // POST: api/Orders/{userId}
         [HttpPost("{userId}")]
-        public async Task<IActionResult> CreateOrder(int userId)
+        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
             var cartItems = await _context.CartItems
-                .Where(c => c.UserId == userId)
+                .Where(c => c.UserId == dto.UserId)
                 .Include(c => c.Product)
                 .ToListAsync();
 
@@ -30,14 +31,13 @@ namespace FashionStoreManagement.API.Controllers
 
             var order = new Order
             {
-                UserId = userId,
+                UserId = dto.UserId,
                 OrderDate = DateTime.Now,
                 OrderItems = new List<OrderItem>()
             };
 
             foreach (var item in cartItems)
             {
-                // Stok kontrolü yapılabilir
                 order.OrderItems.Add(new OrderItem
                 {
                     ProductId = item.ProductId,
@@ -46,7 +46,6 @@ namespace FashionStoreManagement.API.Controllers
                     PriceAtOrderTime = item.Product!.Price
                 });
 
-                // Stoktan düş (ProductSize tablosundan)
                 var stockItem = await _context.ProductSizes
                     .FirstOrDefaultAsync(ps => ps.ProductId == item.ProductId && ps.SizeId == item.SizeId);
 
@@ -55,11 +54,9 @@ namespace FashionStoreManagement.API.Controllers
             }
 
             _context.Orders.Add(order);
-
-            // Sepeti temizle
             _context.CartItems.RemoveRange(cartItems);
-
             await _context.SaveChangesAsync();
+
             return Ok(order);
         }
 
