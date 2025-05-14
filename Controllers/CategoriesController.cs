@@ -39,10 +39,19 @@ namespace FashionStoreManagement.API.Controllers
             };
 
             _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("IX_Categories_Name") == true)
+            {
+                return Conflict("Bu kategori adı zaten kayıtlı.");
+            }
 
             return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
+
 
 
         [HttpPut("{id}")]
