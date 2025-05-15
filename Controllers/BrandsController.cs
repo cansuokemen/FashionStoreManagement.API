@@ -1,76 +1,55 @@
-﻿using FashionStoreManagement.API.Data;
-using FashionStoreManagement.API.Dtos;
+﻿using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using FashionStoreManagement.API.Interfaces;
+using FashionStoreManagement.API.Services;
 
-namespace FashionStoreManagement.API.Controllers
+
+[ApiController]
+[Route("api/[controller]")]
+public class BrandsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BrandsController : ControllerBase
+    private readonly IBrandService _service;
+    public BrandsController(IBrandService service) => _service = service;
+
+    [HttpGet]
+    public async Task<IActionResult> Get() => Ok(await _service.GetAllAsync());
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
     {
-        private readonly AppDbContext _context;
-        public BrandsController(AppDbContext context)
+        var brand = await _service.GetByIdAsync(id);
+        if (brand == null) return NotFound();
+        return Ok(brand);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] BrandCreateDto dto)
+    {
+        try
         {
-            _context = context;
+            var brand = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = brand.Id }, brand);
         }
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Brand>>> GetBrands()
+        catch (ArgumentException ex)
         {
-            return await _context.Brands.ToListAsync();
+            return Conflict(ex.Message);
         }
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Brand>> GetBrand(int id)
-        {
-            var brand = await _context.Brands.FindAsync(id);
-            if (brand == null) return NotFound();
-            return brand;
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] Brand brand)
+    {
+        var success = await _service.UpdateAsync(id, brand);
+        if (!success) return BadRequest();
+        return NoContent();
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<Brand>> CreateBrand([FromBody] BrandCreateDto dto)
-        {
-            var brand = new Brand
-            {
-                Name = dto.Name
-            };
-
-            _context.Brands.Add(brand);
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("IX_Brands_Name") == true)
-            {
-                return Conflict("Bu marka adı zaten kayıtlı.");
-            }
-
-            return CreatedAtAction(nameof(GetBrand), new { id = brand.Id }, brand);
-        }
-
-
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBrand(int id, Brand brand)
-        {
-            if (id != brand.Id) return BadRequest();
-            _context.Entry(brand).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBrand(int id)
-        {
-            var brand = await _context.Brands.FindAsync(id);
-            if (brand == null) return NotFound();
-            _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var success = await _service.DeleteAsync(id);
+        if (!success) return NotFound();
+        return NoContent();
     }
 }
