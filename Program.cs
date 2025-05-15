@@ -11,6 +11,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartValidator, CartValidator>();
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
