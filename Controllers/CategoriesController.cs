@@ -8,77 +8,42 @@ namespace FashionStoreManagement.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public CategoriesController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ICategoryService _service;
+        public CategoriesController(ICategoryService service) => _service = service;
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
-        {
-            return await _context.Categories.ToListAsync();
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
-        {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null) return NotFound();
-            return category;
-        }
+        public async Task<IActionResult> Get() => Ok(await _service.GetAllAsync());
 
         [HttpPost]
-        public async Task<ActionResult<Category>> CreateCategory([FromBody] CategoryCreateDto dto)
+        public async Task<IActionResult> Create([FromBody] CategoryCreateDto dto)
         {
-            var category = new Category
-            {
-                Name = dto.Name
-            };
-
-            _context.Categories.Add(category);
-
             try
             {
-                await _context.SaveChangesAsync();
+                var category = await _service.CreateAsync(dto);
+                return Ok(category);
             }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("IX_Categories_Name") == true)
+            catch (ArgumentException ex)
             {
-                return Conflict("Bu kategori adı zaten kayıtlı.");
+                return Conflict(ex.Message);
             }
-
-            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
-        }
-
-
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, Category category)
-        {
-            if (id != category.Id) return BadRequest();
-            _context.Entry(category).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-                return NotFound("Kategori bulunamadı.");
-
-            var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
-            if (hasProducts)
-                return BadRequest("Bu kategoriye bağlı ürünler bulunduğu için silinemez.");
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                var result = await _service.DeleteAsync(id);
+                if (!result) return NotFound();
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
-
     }
 }

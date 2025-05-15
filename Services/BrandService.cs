@@ -1,6 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
 using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Interfaces;
 using FashionStoreManagement.API.Models;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,7 +1,6 @@
 ﻿using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Models;
 using Microsoft.AspNetCore.Mvc;
-using FashionStoreManagement.API.Interfaces;
 using FashionStoreManagement.API.Services;
 
 

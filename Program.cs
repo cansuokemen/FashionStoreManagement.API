@@ -1,6 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
 using Microsoft.EntityFrameworkCore;
-using FashionStoreManagement.API.Interfaces;
 using FashionStoreManagement.API.Services;
 
 
@@ -11,6 +10,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
