@@ -1,8 +1,5 @@
-﻿using FashionStoreManagement.API.Data;
-using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Models;
+﻿using FashionStoreManagement.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreManagement.API.Controllers
 {

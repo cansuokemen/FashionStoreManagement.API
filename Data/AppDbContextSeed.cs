@@ -1,4 +1,4 @@
-﻿using FashionStoreManagement.API.Models;
+﻿using FashionStoreManagement.API.Entities;
 
 namespace FashionStoreManagement.API.Data
 {

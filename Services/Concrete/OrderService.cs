@@ -1,5 +1,5 @@
 ﻿using FashionStoreManagement.API.Data;
-using FashionStoreManagement.API.Models;
+using FashionStoreManagement.API.Entities;
 using Microsoft.EntityFrameworkCore;
 
 public class OrderService : IOrderService

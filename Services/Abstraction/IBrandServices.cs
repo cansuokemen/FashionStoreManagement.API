@@ -1,5 +1,5 @@
 ﻿using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Models;
+using FashionStoreManagement.API.Entities;
 
 public interface IBrandService
 {

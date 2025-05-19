@@ -1,7 +1,8 @@
-﻿namespace FashionStoreManagement.API.Services;
+﻿namespace FashionStoreManagement.API.Services.Concrete;
 using FashionStoreManagement.API.Data;
 using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Models;
+using FashionStoreManagement.API.Entities;
+using FashionStoreManagement.API.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
 
 public class CartService : ICartService

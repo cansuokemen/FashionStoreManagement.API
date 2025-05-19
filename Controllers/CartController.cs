@@ -1,5 +1,5 @@
 ﻿using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Services;
+using FashionStoreManagement.API.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]

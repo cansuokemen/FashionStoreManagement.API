@@ -1,9 +1,9 @@
 ﻿using FashionStoreManagement.API.Data;
 using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Models;
+using FashionStoreManagement.API.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace FashionStoreManagement.API.Services
+namespace FashionStoreManagement.API.Services.Concrete
 {
     public class BrandService : IBrandService
     {

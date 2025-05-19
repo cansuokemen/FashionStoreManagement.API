@@ -1,6 +1,7 @@
 ﻿using FashionStoreManagement.API.Data;
 using Microsoft.EntityFrameworkCore;
-using FashionStoreManagement.API.Services;
+using FashionStoreManagement.API.Services.Concrete;
+using FashionStoreManagement.API.Services.Abstraction;
 
 
 var builder = WebApplication.CreateBuilder(args);

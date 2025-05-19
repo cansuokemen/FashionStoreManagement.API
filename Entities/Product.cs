@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace FashionStoreManagement.API.Models
+namespace FashionStoreManagement.API.Entities
 {
     public class Product
     {

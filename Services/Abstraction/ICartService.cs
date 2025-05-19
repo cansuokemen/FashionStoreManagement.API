@@ -1,7 +1,7 @@
 ﻿using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Models;
+using FashionStoreManagement.API.Entities;
 
-namespace FashionStoreManagement.API.Services
+namespace FashionStoreManagement.API.Services.Abstraction
 {
     public interface ICartService
     {
