@@ -1,67 +1,31 @@
-﻿using FashionStoreManagement.API.Data;
-using FashionStoreManagement.API.Dtos;
-using FashionStoreManagement.API.Entities;
+﻿using FashionStoreManagement.API.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using FashionStoreManagement.API.Entities;
 
-namespace FashionStoreManagement.API.Controllers
+
+[Route("api/[controller]")]
+[ApiController]
+public class SizesController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SizesController : ControllerBase
+    private readonly ISizeService _sizeService;
+
+    public SizesController(ISizeService sizeService)
     {
-        private readonly AppDbContext _context;
-        public SizesController(AppDbContext context)
-        {
-            _context = context;
-        }
+        _sizeService = sizeService;
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Size>>> GetSizes()
-        {
-            return await _context.Sizes.ToListAsync();
-        }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Size>>> GetAll()
+    {
+        var sizes = await _sizeService.GetAllAsync();
+        return Ok(sizes);
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Size>> GetSize(int id)
-        {
-            var size = await _context.Sizes.FindAsync(id);
-            if (size == null) return NotFound();
-            return size;
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Size>> CreateSize([FromBody] SizeCreateDto dto)
-        {
-            var size = new Size
-            {
-                Name = dto.Name
-            };
-
-            _context.Sizes.Add(size);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetSize), new { id = size.Id }, size);
-        }
-
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSize(int id, Size size)
-        {
-            if (id != size.Id) return BadRequest();
-            _context.Entry(size).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSize(int id)
-        {
-            var size = await _context.Sizes.FindAsync(id);
-            if (size == null) return NotFound();
-            _context.Sizes.Remove(size);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Size>> GetById(int id)
+    {
+        var size = await _sizeService.GetByIdAsync(id);
+        if (size == null) return NotFound();
+        return Ok(size);
     }
 }

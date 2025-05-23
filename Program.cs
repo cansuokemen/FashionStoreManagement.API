@@ -17,6 +17,8 @@ builder.Services.AddScoped<ICartValidator, CartValidator>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductSizeService, ProductSizeService>();
+builder.Services.AddScoped<ISizeService, SizeService>();
+
 
 
 
