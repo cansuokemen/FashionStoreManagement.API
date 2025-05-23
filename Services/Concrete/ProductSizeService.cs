@@ -1,7 +1,10 @@
 ﻿using FashionStoreManagement.API.Data;
+using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Entities;
 using FashionStoreManagement.API.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FashionStoreManagement.API.Services.Concrete
 {
@@ -30,8 +33,15 @@ namespace FashionStoreManagement.API.Services.Concrete
                 .FirstOrDefaultAsync(ps => ps.ProductId == productId && ps.SizeId == sizeId);
         }
 
-        public async Task<ProductSize> CreateAsync(ProductSize productSize)
+        public async Task<ProductSize> CreateAsync(ProductSizeCreateDto dto)
         {
+            var productSize = new ProductSize
+            {
+                ProductId = dto.ProductId,
+                SizeId = dto.SizeId,
+                StockQuantity = dto.StockQuantity
+            };
+
             _context.ProductSizes.Add(productSize);
             await _context.SaveChangesAsync();
             return productSize;
