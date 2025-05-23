@@ -1,8 +1,7 @@
-﻿using FashionStoreManagement.API.Data;
-using FashionStoreManagement.API.Dtos;
+﻿using FashionStoreManagement.API.Dtos;
 using FashionStoreManagement.API.Entities;
+using FashionStoreManagement.API.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreManagement.API.Controllers
 {
@@ -10,84 +9,83 @@ namespace FashionStoreManagement.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public UsersController(AppDbContext context)
+        private readonly IUserService _userService;
+
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _userService.GetAllAsync();
+            return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<User>> GetById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
-            return user;
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+                return NotFound();
+            return Ok(user);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<User>> Create([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var created = await _userService.CreateAsync(user);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<User>> Update(int id, [FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var updated = await _userService.UpdateAsync(id, user);
+            if (updated == null)
+                return NotFound();
+
+            return Ok(updated);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _userService.DeleteAsync(id);
+            if (!result)
+                return NotFound();
+
+            return NoContent();
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody] UserRegisterDto dto)
         {
-            // E-posta tekil olmalı
-            var exists = await _context.Users.AnyAsync(u => u.Email == dto.Email);
-            if (exists)
-                return Conflict("Bu e-posta ile daha önce kayıt olunmuş.");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var user = new User
-            {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                Password = dto.Password // Gerçek projede hashlenmeli!
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            var created = await _userService.RegisterAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User user)
-        {
-            if (id != user.Id) return BadRequest();
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
+        public async Task<ActionResult<User>> Login([FromBody] UserLoginDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
-
-            if (user == null)
+            var found = await _userService.LoginAsync(dto);
+            if (found == null)
                 return Unauthorized("Geçersiz e-posta veya şifre.");
 
-            return Ok(new
-            {
-                Message = $"Hoş geldin, {user.FullName}!",
-                UserId = user.Id,
-                Email = user.Email
-            });
+            return Ok(found);
         }
 
     }
